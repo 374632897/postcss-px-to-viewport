@@ -18,14 +18,15 @@ var defaults = {
   viewportUnit: 'vw',
   selectorBlackList: [],
   minPixelValue: 1,
-  mediaQuery: false
+  mediaQuery: false,
+  custom: {},
 };
 
 module.exports = postcss.plugin('postcss-px-to-viewport', function (options) {
 
   var opts = objectAssign({}, defaults, options);
   var pxReplace = createPxReplace(opts.viewportWidth, opts.minPixelValue, opts.unitPrecision, opts.viewportUnit);
-
+  var customProps = Object.keys(opts.custom);
   return function (css) {
 
     css.walkDecls(function (decl, i) {
@@ -34,7 +35,12 @@ module.exports = postcss.plugin('postcss-px-to-viewport', function (options) {
 
       if (blacklistedSelector(opts.selectorBlackList, decl.parent.selector)) return;
 
-      decl.value = decl.value.replace(pxRegex, pxReplace);
+      if (customProps.indexOf(decl.prop) !== -1) {
+        decl.value = opts.custom[decl.prop](decl.value);
+      } else {
+        decl.value = decl.value.replace(pxRegex, pxReplace);
+      }
+
     });
 
     if (opts.mediaQuery) {
