@@ -3,9 +3,12 @@
 var fs = require('fs');
 var postcss = require('postcss');
 var pxToViewport = require('..');
-var css = fs.readFileSync('main.css', 'utf8');
+var css = fs.readFileSync(require.resolve('./main.css'), 'utf8');
 var options = {
-    replace: false
+    replace: false,
+    custom: {
+      'font-size': (value) => parseInt(value, 10) / 2 + 'px',
+    },
 };
 var processedCss = postcss(pxToViewport(options)).process(css).css;
 
